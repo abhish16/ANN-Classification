@@ -4,6 +4,7 @@ import tensorflow as tf
 from sklearn.preprocessing import StandardScaler, LabelEncoder, OneHotEncoder
 import pandas as pd
 import pickle
+import boto3
 
 # Load the trained model
 model = tf.keras.models.load_model('model.h5')
@@ -20,7 +21,7 @@ with open('scaler.pkl', 'rb') as file:
 
 
 ## streamlit app
-st.title('Customer Churn PRediction')
+st.title('Customer Churn Prediction')
 
 # User input
 geography = st.selectbox('Geography', onehot_encoder_geo.categories_[0])
@@ -33,6 +34,9 @@ tenure = st.slider('Tenure', 0, 10)
 num_of_products = st.slider('Number of Products', 1, 4)
 has_cr_card = st.selectbox('Has Credit Card', [0, 1])
 is_active_member = st.selectbox('Is Active Member', [0, 1])
+user_feedback=st.text_input('User Feedback')
+language = st.selectbox('Language', ['en','de','es','fr'])
+
 
 # Prepare the input data
 input_data = pd.DataFrame({
@@ -46,6 +50,18 @@ input_data = pd.DataFrame({
     'IsActiveMember': [is_active_member],
     'EstimatedSalary': [estimated_salary]
 })
+
+#sentiment Analysis
+
+def analyze_sentiment(user_feedback, language):
+    client = boto3.client('comprehend')
+
+    try:
+        response = client.detect_sentiment(Text=user_feedback, LanguageCode=language)
+        user_sentiment = response['Sentiment']
+        return user_sentiment
+    except Exception as e:
+        return f"Error: {str(e)}"
 
 # One-hot encode 'Geography'
 geo_encoded = onehot_encoder_geo.transform([[geography]]).toarray()
@@ -62,9 +78,18 @@ input_data_scaled = scaler.transform(input_data)
 prediction = model.predict(input_data_scaled)
 prediction_proba = prediction[0][0]
 
+#Sentiment
+analyze_sentiment(user_feedback,language)
+
 st.write(f'Churn Probability: {prediction_proba:.2f}')
+st.write(f'User sentiment is : {user_sentiment}' )
 
 if prediction_proba > 0.5:
     st.write('The customer is likely to churn.')
 else:
     st.write('The customer is not likely to churn.')
+
+
+
+
+
