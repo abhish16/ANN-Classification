@@ -1,7 +1,10 @@
 import boto3
+import os
+os.environ["ACCESS"] 
+os.environ["KEY"] 
 
 # AWS Comprehend Client
-comprehend = boto3.client("comprehend", region_name="us-east-1",aws_access_key_id='AKIA3CMCCRAS6WCZ7ESH',aws_secret_access_key='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')
+comprehend = boto3.client("comprehend", region_name="us-east-1",aws_access_key_id= os.environ.get("ACCESS"),aws_secret_access_key=os.environ.get("KEY"))
 
 def detect_language(text):
     """Detects the dominant language in the given text."""
