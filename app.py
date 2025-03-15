@@ -4,7 +4,6 @@ import tensorflow as tf
 from sklearn.preprocessing import StandardScaler, LabelEncoder, OneHotEncoder
 import pandas as pd
 import pickle
-import boto3
 
 # Load the trained model
 model = tf.keras.models.load_model('model.h5')
@@ -50,16 +49,6 @@ input_data = pd.DataFrame({
 })
 
 #sentiment Analysis
-
-def analyze_sentiment(user_feedback, language):
-    client = boto3.client('comprehend',region_name='us-east-1',aws_access_key_id='AKIA3CMCCRAS6WCZ7ESH',aws_secret_access_key='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')
-
-    try:
-        response = client.detect_sentiment(Text=user_feedback, LanguageCode=language)
-        user_sentiment = response['Sentiment']
-        return user_sentiment
-    except Exception as e:
-        return f"Error: {str(e)}"
 
 # One-hot encode 'Geography'
 geo_encoded = onehot_encoder_geo.transform([[geography]]).toarray()
