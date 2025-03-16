@@ -1,5 +1,6 @@
 import boto3
 import os
+from sns_notification import send_sns_notification
 os.environ["ACCESS"] 
 os.environ["KEY"] 
 
@@ -23,6 +24,10 @@ def analyze_sentiment(text, language_code):
     
     if language_code in supported_languages:
         response = comprehend.detect_sentiment(Text=text, LanguageCode=language_code)
+        Sentiment = response["Sentiment"]
+        # If sentiment is Negative, send an SNS notification
+        if Sentiment == "NEGATIVE":
+            send_sns_notification()
         return {
             "Sentiment": response["Sentiment"],
             "ConfidenceScores": response["SentimentScore"]
